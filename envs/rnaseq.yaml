@@ -1,0 +1,19 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults        # en dernier, par sécurité
+dependencies:
+  # QC & trimming
+  - fastqc=0.12.*
+  - fastp=0.24.*
+  - salmon=1.10
+  # Quantification
+  - salmon=1.10.2*
+
+  # Reporting
+  - multiqc=1.19.*
+
+  # Utilitaires (toujours pratiques)
+  - pigz            # gzip multithread
+  - wget
+  - python=3.11     # requis par fastp / multiqc

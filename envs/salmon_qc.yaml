@@ -1,0 +1,8 @@
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - r-base
+  - r-ggplot2
+  - r-dplyr
+  - r-jsonlite

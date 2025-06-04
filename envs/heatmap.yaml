@@ -1,0 +1,9 @@
+name: heatmap
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - r-base>=4.2
+  - r-tidyverse
+  - r-pheatmap
+  - r-data.table

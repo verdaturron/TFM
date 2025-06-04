@@ -1,0 +1,19 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - r-base=4.2
+  - r-biocmanager
+  - libxml2
+  - libcurl
+  - r-xml
+  - r-rcurl
+  - r-readr
+  - r-dplyr=1.1.2
+  - r-ggplot2
+  - bioconductor-clusterprofiler
+  - bioconductor-enrichplot
+  # Remplacer par le nom exact :
+  - bioconductor-org.cf.eg.db

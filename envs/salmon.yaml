@@ -1,0 +1,9 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - salmon=1.10.3           # ← version stable (prend la plus récente si tu enlèves “=1.10”)
+  - libgomp               # bibliothèque OpenMP nécessaire sous Linux/WSL
+  - python=3.9

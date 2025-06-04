@@ -1,0 +1,8 @@
+name: enrichment
+channels:
+  - conda-forge
+  - defaults           # pas de bioconda → on ne télécharge plus les paquets bio ici
+dependencies:
+  - r-base =4.2        # version moderne, stable
+  - r-tidyverse        # readr / dplyr / ggplot2
+  - r-biocmanager      # pour installer clusterProfiler & cie au vol

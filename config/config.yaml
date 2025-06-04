@@ -1,0 +1,41 @@
+# config/config.yaml
+samples:
+  - Border-Photoactivation-1
+  - Border-Photoactivation-2
+  - Border-Photoactivation-3
+  - Central-Photoactivation-1
+  - Central-Photoactivation-2
+  - Central-Photoactivation-3
+  - Control-1
+  - Control-2
+  - Control-3
+  - Entirely-Photoactivated-1
+  - Entirely-Photoactivated-2
+  - Entirely-Photoactivated-3
+
+# chemin WSL : on le met ENTIEREMENT entre guillemets car il contient des espaces
+fastq_dir: "/mnt/c/Users/pirag/Documents/TFM/RNAseq data/Processed_star_run4/1_Filtered"
+
+results_dir: "results"     # dossier où vont les sorties
+threads: 6
+
+ref:
+  transcript_fasta: "ref/CanFam_cdna.fa.gz"
+  gtf:              "ref/CanFam.gtf.gz"
+  salmon_index:     "ref/salmon_index"
+
+# ------------------------------------------------------------------
+# Paramètres spécifiques pour le volcano plot
+# ------------------------------------------------------------------
+volcano:
+  padj_cutoff: 0.1   # Seuil de FDR ajustée (padj) pour considérer un gène significatif
+  lfc_cutoff: 1       # Seuil du log2 fold change (en valeur absolue)
+
+# ------------------------------------------------------------------
+# LISTE DES MODALITÉS / CONDITIONS (pour les comparaisons deux-à-deux)
+# ------------------------------------------------------------------
+conditions:
+  - Border
+  - Central
+  - Control
+  - Entirely

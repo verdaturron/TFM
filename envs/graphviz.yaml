@@ -1,0 +1,5 @@
+channels:
+  - conda-forge
+dependencies:
+  - graphviz            # dot
+  - python              # juste pour l'echo/python si besoin

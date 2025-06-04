@@ -1,0 +1,14 @@
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - r-base=4.2
+  - r-biocmanager
+  - bioconductor-deseq2
+  - r-tibble
+  - r-readr
+  - r-dplyr
+  - r-ggplot2
+  - r-stringr
