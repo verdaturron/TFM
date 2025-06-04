@@ -1,0 +1,26 @@
+# Snakemake/Conda
+.snakemake/
+*.snakemake*
+*.log
+*.lock
+.env/
+envs/*/         
+*.conda
+*.yaml~
+
+# Results / large artefacts
+results/
+ref/
+tmp/
+*.zip
+*.fastq.gz
+*.bam
+*.sam
+*.sf
+*.pdf
+*.png
+
+# Editors/OS
+*.swp
+.DS_Store
+Thumbs.db
