@@ -4,12 +4,12 @@ suppressPackageStartupMessages({
 })
 
 out_pdf <- snakemake@output[["pdf"]]
-jsons   <- snakemake@input          # liste des meta_info.json
+jsons   <- snakemake@input         
 
 rates <- lapply(jsons, function(j) {
   meta <- read_json(j)
   tibble(
-    sample  = basename(dirname(dirname(j))),   # <- remonte d’un niveau de plus
+    sample  = basename(dirname(dirname(j))),  
     aligned = 100 * meta$num_mapped / meta$num_processed
   )
 }) %>% bind_rows()
