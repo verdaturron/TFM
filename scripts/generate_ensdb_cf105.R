@@ -24,9 +24,9 @@ qry <- query(ah, c("Canis familiaris", "EnsDb", "v105"))
 if (length(qry) == 0)
   stop("EnsDb v105 pour chien introuvable sur AnnotationHub.")
 
-edb <- qry[[1]]              # télécharge (±65 Mo) puis met en cache
+edb <- qry[[1]]              
 
 message("✅ Base reçue. Sauvegarde SQLite…")
-saveDb(edb, file = db_file)  # ~65 Mo
+saveDb(edb, file = db_file)  
 
 message("📦 SQLite créé : ", db_file)
