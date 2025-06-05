@@ -2,32 +2,32 @@
 # volcano_plot.R — génère un volcano-plot PDF + PNG
 
 suppressPackageStartupMessages({
-  library(data.table)   # fread()
+  library(data.table)  
   library(ggplot2)
   library(ggrepel)
 })
 
-## ----------------------- Paramètres -----------------------
+# Paramètres 
 args <- commandArgs(trailingOnly = TRUE)
 if (length(args) < 4) {
   stop("Usage: volcano_plot.R <DE_results.tsv> <padj_cutoff> <lfc_cutoff> <outfile_base>")
 }
 de_file      <- args[1]
-padj_cutoff  <- as.numeric(args[2])   # ex : 0.05
-lfc_cutoff   <- as.numeric(args[3])   # ex : 1
-outfile_base <- args[4]               # ex : results/plots/volcano_border_vs_central
+padj_cutoff  <- as.numeric(args[2])  
+lfc_cutoff   <- as.numeric(args[3])   
+outfile_base <- args[4]               
 
-## ----------------------- Lecture --------------------------
+
 dt <- fread(de_file)
 
-## Colonne pour la couleur
+
 dt[, status := fifelse(padj < padj_cutoff & log2FoldChange >  lfc_cutoff, "Up",
                        fifelse(padj < padj_cutoff & log2FoldChange < -lfc_cutoff, "Down", "No"))]
 
 ## Pour ggplot, -log10(FDR)
 dt[, neglog10FDR := -log10(padj)]
 
-## ----------------------- Plot -----------------------------
+# Plot
 p <- ggplot(dt, aes(x = log2FoldChange, y = neglog10FDR, colour = status)) +
   geom_point(size = 1.2, alpha = .8) +
   scale_colour_manual(values = c(Down = "forestgreen", Up = "firebrick", No = "grey50")) +
@@ -39,13 +39,13 @@ p <- ggplot(dt, aes(x = log2FoldChange, y = neglog10FDR, colour = status)) +
        colour = "Differential Expression") +
   theme_bw(base_size = 12)
 
-## Option : annoter les points les plus extrêmes
-to_label <- dt[status != "No"][order(padj)][1:10]          # 10 gènes les plus significatifs
+# annoter les points les plus extrêmes
+to_label <- dt[status != "No"][order(padj)][1:10]         
 p <- p + geom_text_repel(data = to_label,
-                         aes(label = gene_id),             # ou gene_name si dispo
+                         aes(label = gene_id),          
                          max.overlaps = 50,
                          size = 3)
 
-## ----------------------- Export ---------------------------
+# Export
 ggsave(paste0(outfile_base, ".pdf"), p, width = 7, height = 7)
 ggsave(paste0(outfile_base, ".png"), p, width = 7, height = 7, dpi = 300)
