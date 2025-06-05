@@ -10,7 +10,7 @@ raw_zip  <- snakemake@input[["raw_zip"]]
 trim_zip <- snakemake@input[["trim_zip"]]
 out_pdf  <- snakemake@output[["pdf"]]
 
-# ────────────────── fonctions utilitaires ──────────────────
+# fonctions
 extract_module <- function(zip_path, module) {
   inner <- unzip(zip_path, list = TRUE)$Name
   inner <- inner[grepl("fastqc_data.txt$", inner)][1]
@@ -29,7 +29,7 @@ read_qual <- function(z, lbl) extract_module(z, "Per sequence quality scores")  
   setNames(c("Quality", "Count")) |>
   mutate(source = lbl)
 
-# ────────────────── données ─────────────────────────────────
+# data 
 len_all <- bind_rows(read_len(raw_zip,  "Before"),
                      read_len(trim_zip, "After")) |>
   mutate(Length = as.numeric(sub("^([0-9]+).*", "\\1", Length)) + 0.5)
@@ -37,7 +37,7 @@ len_all <- bind_rows(read_len(raw_zip,  "Before"),
 qual_all <- bind_rows(read_qual(raw_zip,  "Before"),
                       read_qual(trim_zip, "After"))
 
-# ────────────────── graphiques ──────────────────────────────
+# graphiques 
 p_len <- ggplot(len_all, aes(Length, Count, fill = source)) +
   geom_col(alpha = .6, position = "identity") +
   scale_x_continuous(breaks = scales::pretty_breaks(n = 12)) +
@@ -53,7 +53,7 @@ p_qual <- ggplot(qual_all, aes(Quality, Count, colour = source)) +
   theme_bw(11) +
   labs(title = "Per-sequence quality", x = "Phred", y = "Count")
 
-# ────────────────── sortie ──────────────────────────────────
+# outpout 
 dir.create(dirname(out_pdf), recursive = TRUE, showWarnings = FALSE)
 ggsave(out_pdf,
        gridExtra::arrangeGrob(p_len, p_qual, ncol = 2),
