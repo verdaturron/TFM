@@ -2,9 +2,8 @@
 ## scripts/functional_enrichment.R
 ## Pipeline GO / KEGG pour Canis familiaris, mapping via org.Cf.eg.db
 
-# ───────────────────────────────────────────────────────────────────────
-# 0. Dépendances (installation auto si manquantes)
-# ───────────────────────────────────────────────────────────────────────
+# Dépendances
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")
 
@@ -27,16 +26,14 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-# ───────────────────────────────────────────────────────────────────────
 # 1. Chemins fournis par Snakemake
-# ───────────────────────────────────────────────────────────────────────
-res_file <- snakemake@input[["deseq"]]   # chemin vers results/deseq2/deseq2_results.tsv
-out_dir  <- snakemake@output[["dir"]]    # dossier de sortie results/enrichment
+
+res_file <- snakemake@input[["deseq"]]  
+out_dir  <- snakemake@output[["dir"]]  
 if (!dir.exists(out_dir)) dir.create(out_dir, recursive = TRUE)
 
-# ───────────────────────────────────────────────────────────────────────
 # 2. Lecture & filtre des gènes DE
-# ───────────────────────────────────────────────────────────────────────
+
 res <- read_tsv(res_file, show_col_types = FALSE)
 
 sig <- res |>
@@ -48,9 +45,8 @@ gene_list <- sig$gene_id
 if (length(gene_list) < 4)
   stop("Pas assez de gènes DE pour l’enrichissement.")
 
-# ───────────────────────────────────────────────────────────────────────
-# 3. Mapping ENSEMBL → SYMBOL / ENTREZ via org.Cf.eg.db
-# ───────────────────────────────────────────────────────────────────────
+# 3. Mapping ENSEMBL → SYMBOL
+
 cat("⚙️  Mapping Ensembl → SYMBOL/ENTREZ via org.Cf.eg.db…\n")
 
 map <- AnnotationDbi::select(
@@ -76,9 +72,8 @@ sig <- sig |>
 symbol_list <- unique(na.omit(sig$external_gene_name))
 entrez_list <- unique(na.omit(sig$entrezgene_id))
 
-# ───────────────────────────────────────────────────────────────────────
 # 4. Enrichissement GO (keyType = SYMBOL)
-# ───────────────────────────────────────────────────────────────────────
+
 ego <- enrichGO(
   symbol_list,
   OrgDb         = org.Cf.eg.db,
@@ -111,9 +106,8 @@ if (!is.null(ego) && nrow(ego@result) > 0) {
   message("⚠ Aucun résultat GO BP significatif.")
 }
 
-# ───────────────────────────────────────────────────────────────────────
 # 5. Enrichissement KEGG (IDs ENTREZ)
-# ───────────────────────────────────────────────────────────────────────
+
 log_path <- file.path(out_dir, "log.txt")
 log_conn <- file(log_path, open = "wt")
 logmsg <- function(...) { cat(paste0(..., "\n"), file = log_conn); message(...) }
@@ -150,9 +144,8 @@ if (length(entrez_list) > 0) {
 }
 close(log_conn)
 
-# ───────────────────────────────────────────────────────────────────────
 # 6. Sauvegarde des objets R
-# ───────────────────────────────────────────────────────────────────────
+
 saveRDS(
   list(ego = ego, kegg = kegg),
   file = file.path(out_dir, "enrichment_objects.rds")
