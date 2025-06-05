@@ -4,16 +4,15 @@ suppressPackageStartupMessages({
   library(tibble)
   library(dplyr)
   library(ggplot2)
-  library(ggrepel)   # déjà présent dans l’env heatmap.yaml
+  library(ggrepel)   
 })
 
-# ----- I/O -----
 cts_file  <- snakemake@input[["counts"]]
 meta_file <- snakemake@input[["meta"]]
 out_pdf   <- snakemake@output[["pdf"]]
 out_png   <- snakemake@output[["png"]]
 
-# ----- data -----
+#  data 
 cts  <- readr::read_tsv(cts_file, show_col_types = FALSE)
 meta <- readr::read_tsv(meta_file, show_col_types = FALSE) |>
   mutate(across(where(is.character), factor)) |>
@@ -25,7 +24,7 @@ rownames(mat) <- cts$gene_id
 # même ordre échantillons
 mat  <- mat[, rownames(meta)]
 
-# ----- VST + PCA -----
+# VST + PCA 
 dds     <- DESeqDataSetFromMatrix(mat, meta, design = ~ condition)
 vsd     <- vst(dds, blind = TRUE)
 pca     <- prcomp(t(assay(vsd)))
@@ -45,7 +44,7 @@ p <- ggplot(pdat, aes(PC1, PC2, color = condition, label = sample)) +
   theme(panel.grid = element_blank(),
         legend.position = "right")
 
-# ----- write -----
+#  write 
 dir.create(dirname(out_pdf), recursive = TRUE, showWarnings = FALSE)
 ggsave(out_pdf, p, width = 6, height = 5)
 ggsave(out_png, p, width = 6, height = 5, dpi = 300)
