@@ -1,22 +1,20 @@
 configfile: "config/config.yaml"
 
-SAMPLES     = config["samples"]         
+SAMPLES     = config["samples"]
 FASTQ_DIR   = config["fastq_dir"]
 RESULTS     = config["results_dir"]
 THREADS     = config["threads"]
 
-FASTQC  = "fastqc"     # dans l'env rnaseq
+FASTQC  = "fastqc"
 FASTP   = "fastp"
-MULTIQC = "multiqc"    # idem
+MULTIQC = "multiqc"
 
 REF          = config["ref"]
 TRANSCRIPTS  = REF["transcript_fasta"]
 GTF          = REF["gtf"]
 SALMON_INDEX = REF["salmon_index"]
 
-
-######  RÈGLE SOMMAIRE (tout ce qu’on veut en sortie)
-
+## RÈGLE SOMMAIRE (tout ce qu’on veut en sortie)
 import itertools
 
 # dé-duplique et ordonne les conditions déclarées dans le YAML
@@ -26,8 +24,7 @@ CONDITIONS = sorted(set(config["conditions"]))
 PAIRS = [(a, b) for a, b in itertools.combinations(CONDITIONS, 2)]
 
 
-###### Lire la liste des conditions depuis le YAML & générer les paires
-
+## Lire la liste des conditions depuis le YAML & générer les paires
 
 CONDITIONS = config["conditions"]
 PAIRS = list(itertools.combinations(CONDITIONS, 2))
@@ -60,7 +57,7 @@ rule all:
         # 6. Expression génique
         f"{RESULTS}/expression/gene_counts.tsv",
 
-        #  Les sorties déjà existantes (FastQC, trim, Salmon, tximport, etc.) —
+        # Les sorties déjà existantes (FastQC, trim, Salmon, tximport, etc.)
         expand(f"{RESULTS}/fastqc/{{sample}}_R1_fastqc.html",sample=SAMPLES), \
         expand(f"{RESULTS}/fastqc/{{sample}}_R2_fastqc.html",sample=SAMPLES), \
         expand(f"{RESULTS}/trimmed/{{sample}}_R1_trimmed.fastq.gz",sample=SAMPLES), \
@@ -71,13 +68,13 @@ rule all:
         f"{RESULTS}/multiqc/multiqc_report.html", \
         f"{RESULTS}/expression/gene_counts.tsv",
 
-        #  Tous les TSV DE deux-à-deux
+        # Tous les TSV DE deux-à-deux
         *PAIR_TSVS,
 
-        #  Le TSV fusionné 
+        # Le TSV fusionné
         "results/deseq2/deseq2_all_pairwise.tsv",
 
-        # —les volcano-plots PDF 
+        # les volcano-plots PDF
         *[
         f"results/plots/volcano_{c1}_vs_{c2}.pdf"
         for c1, c2 in PAIRS
@@ -88,17 +85,22 @@ rule all:
 
         # 8. test qualité trim
         expand(f"{RESULTS}/qc_hist/{{sample}}_lenqual.pdf", sample=SAMPLES),
+
         # 9. Barplot taux d’alignement Salmon
 
         f"{RESULTS}/qc_hist/salmon_alignment_rates.pdf",
 
         # 10. Heatmap des gènes DE
+
         expand("results/plots/heatmap_{c1}_vs_{c2}.pdf", c1=[p[0] for p in PAIRS], c2=[p[1] for p in PAIRS]),
         expand("results/plots/heatmap_{c1}_vs_{c2}.png", c1=[p[0] for p in PAIRS], c2=[p[1] for p in PAIRS]),
-        #rapport workflow DAG
+
+        # rapport workflow DAG
+
         f"{RESULTS}/report/workflow_dag.html",
 
 # ---------- 1. FASTQC sur données brutes ----------
+
 rule fastqc_raw:
     input:
         r1 = lambda w: f"{FASTQ_DIR}/{w.sample}_R1.fastq.gz",
@@ -115,8 +117,8 @@ rule fastqc_raw:
         {FASTQC} "{input.r1}" "{input.r2}" --outdir {RESULTS}/fastqc -t {threads}
         """
 
-
 # ---------- 2. Trim avec fastp ----------
+
 rule fastp:
     input:
         r1 = lambda w: f"{FASTQ_DIR}/{w.sample}_R1.fastq.gz",
@@ -133,8 +135,8 @@ rule fastp:
                 -w {threads} --detect_adapter_for_pe
         """
 
-
 # ---------- 3. FASTQC après trim ----------
+
 rule fastqc_trimmed:
     input:
         r1 = f"{RESULTS}/trimmed/{{sample}}_R1_trimmed.fastq.gz",
@@ -151,7 +153,8 @@ rule fastqc_trimmed:
         {FASTQC} "{input.r1}" "{input.r2}" --outdir {RESULTS}/fastqc_posttrim -t {threads}
         """
 
-    # ---------- Histogrammes qualité / longueur (avant vs apres) ----------
+# ---------- Histogrammes qualité / longueur (Before vs After) ----------
+
 rule fastqc_histograms:
     input:
         raw_zip  = f"{RESULTS}/fastqc/{{sample}}_R1_fastqc.zip",
@@ -161,10 +164,9 @@ rule fastqc_histograms:
     conda: "envs/qc_plots.yaml"
     script: "scripts/plot_fastqc_hist.R"
 
-
 # ---------- 4. Rapport global MultiQC ----------
+
 rule multiqc:
-    # on force Snakemake à attendre que TOUS les .zip FastQC existent
     input:
         # zips bruts
         expand(f"{RESULTS}/fastqc/{{sample}}_R1_fastqc.zip", sample=SAMPLES) +
@@ -183,6 +185,7 @@ rule multiqc:
         """
 
 # ---------- Barplot taux d’alignement Salmon ----------
+
 rule salmon_alignment_barplot:
     input:
         expand(f"{RESULTS}/salmon/{{sample}}/aux_info/meta_info.json",
@@ -192,8 +195,8 @@ rule salmon_alignment_barplot:
     conda: "envs/salmon_qc.yaml"
     script: "scripts/plot_salmon_alignment.R"
 
-
 # -------------5 salmon quantification rule -------------
+
 rule download_transcripts:
     output:
         fasta = config["ref"]["transcript_fasta"],
@@ -219,7 +222,9 @@ rule salmon_index:
         mkdir -p {output}
         salmon index -t {input.fasta} -i {output} -p {threads}
         """
+
 # -------------- 6. Salmon quantification --------------
+
 rule quant:
     input:
         index = SALMON_INDEX,
@@ -240,7 +245,8 @@ rule quant:
             -o $(dirname {output.quant})
         """
 
-# -------------- 7. Agrégation transcript -----------------
+# -------------- 7. Agrégation transcript -> gène -----------------
+
 rule tximport:
     input:
         quant = expand(f"{RESULTS}/salmon/{{sample}}/quant.sf", sample=SAMPLES),
@@ -248,11 +254,12 @@ rule tximport:
     output:
         counts = f"{RESULTS}/expression/gene_counts.tsv",
         tpm    = f"{RESULTS}/expression/gene_tpm.tsv"
-    threads: 1                   # ← OK avant script
-    conda: "envs/tximport.yaml"  # ← OK avant script
-    script: "scripts/tximport.R" # ← TOUJOURS en dernier
+    threads: 1
+    conda: "envs/tximport.yaml"
+    script: "scripts/tximport.R"
 
 # -------------- 8. deseq2 --------------
+
 rule deseq2_pairwise:
     input:
         counts = "results/expression/gene_counts.tsv",
@@ -281,11 +288,11 @@ rule volcano_pairwise:
     params:
         padj = config["volcano"]["padj_cutoff"],
         lfc  = config["volcano"]["lfc_cutoff"]
-    conda: "envs/volcano.yaml"          # ← voir §3
+    conda: "envs/volcano.yaml"
     script: "scripts/volcano_pairwise.R"
 
 
-# – Heatmap : 30 gènes DE
+# Heatmap : 30 gènes DE
 
 rule heatmap_pairwise:
     input:
@@ -296,13 +303,14 @@ rule heatmap_pairwise:
         pdf = "results/plots/heatmap_{cond1}_vs_{cond2}.pdf",
         png = "results/plots/heatmap_{cond1}_vs_{cond2}.png"
     params:
-        top = 30                      # ← nombre de gènes
+        top = 30
     conda:
         "envs/heatmap.yaml"
     script:
         "scripts/heatmap_DE.R"
 
-# ---------- PCA VST ----------
+# PCA VST
+
 rule pca_vst:
     input:
         counts = "results/expression/gene_counts.tsv",
@@ -310,47 +318,43 @@ rule pca_vst:
     output:
         pdf = "results/plots/pca_vst.pdf",
         png = "results/plots/pca_vst.png"
-    conda: "envs/pca.yaml"       # ← nouveau fichier
+    conda: "envs/pca.yaml"
     script: "scripts/pca_vst.R"
 
-#  Règle : instantané du DAG Snakemake
+# Règle : instantané du DAG Snakemake
 
 rule dag_snapshot:
     output:
         svg  = f"{RESULTS}/report/workflow_dag.svg",
         html = f"{RESULTS}/report/workflow_dag.html"
     conda: "envs/graphviz.yaml"
-    threads: 1
     shell:
         r"""
         mkdir -p {RESULTS}/report
-
-        # 1. Graphe SVG
         snakemake --quiet --dag | dot -Tsvg -o {output.svg}
 
-        # 2. Petit wrapper HTML
-        cat <<'EOF' > {output.html}
-        <!doctype html>
-        <html lang="en">
-        <head>
-          <meta charset="utf-8">
-          <title>Snakemake DAG</title>
-          <style>
-            body{margin:0}  /* plein écran */
-            svg{width:100vw;height:100vh}
-          </style>
-        </head>
-        <body>
-          <!-- le SVG sera chargé depuis le même dossier -->
-          <object data="workflow_dag.svg" type="image/svg+xml"></object>
-        </body>
-        </html>
-        EOF
+        # wrapper HTML plein-écran (heredoc non indenté)
+cat > {output.html} <<'HTML'
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Snakemake DAG</title>
+  <style>
+    body{{margin:0}}
+    svg{{width:100vw;height:100vh}}
+  </style>
+</head>
+<body>
+  <object data="workflow_dag.svg" type="image/svg+xml"></object>
+</body>
+</html>
+HTML
         """
+
 
 # -------------- 10. enrichissemement --------------
 
-# Et rend "functional_enrichment" dépendant du SQLite :
 rule functional_enrichment:
     input:
         deseq = "results/deseq2/deseq2_results.tsv"
