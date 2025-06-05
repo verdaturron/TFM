@@ -1,113 +1,117 @@
-# TFM
+# SupraWaves RNA-seq pipeline
+## Overview
 
-SupraWaves RNA-seq pipeline
+This project contains a **Snakemake** workflow that processes raw FASTQ files from dog (*MDCK*) cells into:
 
-This project holds a Snakemake workflow that turns raw FASTQ files from dog (MDCK) cells into:
+- ✅ Quality reports (**FastQC**, **MultiQC**)  
+- ✂️ Trimmed reads (**fastp**)  
+- 🔢 Transcript counts (**Salmon**) and gene counts (**tximport**)  
+- 📊 Differential expression tables (**DESeq2**)  
+- 📈 Visualizations (volcano plots, heatmaps, PCA)  
+- 🧬 *Optional*: GO / KEGG enrichment analysis
 
-    quality reports (FastQC, MultiQC)
+---
 
-    trimmed reads (fastp)
+This workflow was developed as part of my master's thesis:  
+**“Self-sustained velocity waves and pattern emergence in tissues: mechanotranscriptomics in confined epithelia”**  
+**Corentin Lacaze, 2025**
 
-    transcript counts (Salmon) and gene counts (tximport)
 
-    differential-expression tables (DESeq2)
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-    plots (volcano, heat-map, PCA)
+## 1. Quick start
 
-    optional GO / KEGG enrichment
-
-The code was written for my master thesis “Self-sustained velocity waves and pattern
-emergence in tissues: mechanotranscriptomics
-in confined epithelia” (Corentin Lacaze, 2025).
-
-1. Quick start
-
-bash
-
-# clone the repo
+```bash
+# Clone the repo
 git clone https://github.com/your-user/TFM.git
 cd TFM
 
-# install Snakemake (needs conda or mamba)
+# Install Snakemake (requires conda or mamba)
 mamba create -n snakemake -c conda-forge -c bioconda snakemake=7.32
 conda activate snakemake
 
-# run the small test (needs ~5 min, 2 GB RAM)
-snakemake -n                    # dry run – shows what will happen
-snakemake --use-conda --cores 6 # real run
+# Run the small test (~5 min, 2 GB RAM)
+snakemake -n                      # dry run – shows what will happen
+snakemake --use-conda -j6        # real run using 6 cores
 
-2. Input files
-File / folder	What it is	Notes
-fastq_dir/	Pair-end FASTQ files named <sample>_R1.fastq.gz, <sample>_R2.fastq.gz	gzip-compressed
-config/samples.tsv	Two columns: sample and condition	one line per biological replicate
-config/config.yaml	Settings for the run	edit paths, threads, cut-offs
-ref/	Canis lupus familiaris Ensembl r112 cDNA FASTA + GTF	downloaded by the workflow if missing
-3. How to run on your data
 
-    Put your FASTQ files in fastq_dir/.
+```
 
-    Fill config/samples.tsv with your sample names and the group they belong to.
+# 2. Input files
+| File / Folder        | What it is                                                            | Notes                                                                 |
+|----------------------|------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| `fastq_dir/`         | Paired-end FASTQ files                                                 | Gzip-compressed, named with `_R1.fastq.gz` and `_R2.fastq.gz` suffixes |
+| `config/samples.tsv` | Sample metadata                                                       | Two columns: `sample` and `condition`, one line per biological replicate |
+| `config/config.yaml` | Configuration settings for the run                                    | Edit paths, number of threads, cut-off values, etc.                   |
+| `ref/`               | Reference files for *Canis lupus familiaris* (Ensembl release 112)    | cDNA FASTA and GTF; auto-downloaded by the workflow if missing        |
 
-    Edit config/config.yaml so paths and cut-offs fit your project.
 
-    Launch:
+# 3. How to run on your data
 
-bash
+Put your FASTQ files in fastq_dir/.
+Fill config/samples.tsv with your sample names and the group they belong to.
+Edit config/config.yaml so paths and cut-offs fit your project.
 
-snakemake --use-conda --cores 8 --rerun-incomplete --printshellcmds
+```bash        
+        snakemake --use-conda --cores 8 --rerun-incomplete --printshellcmds
+```
 
 The main results land in results/. A full HTML report is under results/multiqc/.
-4. Output overview
 
-    results/fastqc/ – raw read QC
 
-    results/trimmed/ – trimmed FASTQ files
 
-    results/salmon/ – quant.sf files per sample
+# 4. Output overview
 
-    results/expression/ – gene_counts.tsv, gene_tpm.tsv
+- results/fastqc/ - raw read QC
+    
+- *results/trimmed/ - trimmed FASTQ files
 
-    results/deseq2/ – one TSV per contrast, plus a merged file
+- results/salmon/ - quant.sf files per sample
 
-    results/plots/ – volcano, heat-map, PCA (PDF + PNG)
+- results/expression/ - gene_counts.tsv, gene_tpm.tsv
 
-    results/enrichment/ – GO / KEGG tables and images (optional)
+- results/deseq2/ - one TSV per contrast, plus a merged file
 
-    results/report/workflow_dag.html – graph of the whole pipeline
+- results/plots/ - volcano, heat-map, PCA (PDF + PNG)
 
-5. Software
+- results/enrichment/ – GO / KEGG tables and images (optional)
+
+- results/report/workflow_dag.html – graph of the whole pipeline
+
+
+# 5. Software
 
 All tools run inside small conda environments listed in envs/.
 Snakemake builds them automatically when you use --use-conda.
 
-Main versions used in the thesis:
-Tool	Version
-Snakemake	7.32
-fastp	0.24
-Salmon	1.10.3
-DESeq2	1.40
-clusterProfiler	4.10
-6. Troubleshooting
+### Main versions used in the thesis
 
-    Conda solver is slow – try mamba instead of conda.
+| Tool             | Version |
+|------------------|---------|
+| Snakemake        | 7.32    |
+| fastp            | 0.24    |
+| Salmon           | 1.10.3  |
+| DESeq2           | 1.40    |
+| clusterProfiler  | 4.10    |
 
-    File not found – check paths in config.yaml match your folders.
+# 6. Troubleshooting
 
-    Few reads mapped – make sure you use the right species reference.
+- 🐢 Conda solver is slow: try mamba instead of conda.
 
-    If the run stops midway, fix the problem and re-launch; Snakemake will resume.
+- ❌ File not found: check paths in config.yaml match your folders.
 
-7. Citing
+- 📉 Few reads mapped: make sure you use the right species reference.
+
+- 🔁 If the run stops midway, fix the problem and re-launch; Snakemake will resume.
+
+# 7. Citing
 
 If this pipeline helped your work, please cite:
 
-rust
+Lacaze, C. (2025). *Self-sustained velocity waves and pattern emergence in tissues: mechanotranscriptomics in confined epithelia*.  
+Master’s thesis, Universitat Oberta de Catalunya and Universitat de Barcelona.
 
-Lacaze C. (2025)
-Self-sustained velocity waves and pattern emergence in tissues: mechano-transcriptomics in confined epithelia.
-Master thesis, Universitat oberta de catalunya and Universitat de Barcelona.
-
-8. License
+# 8. License
 
 Code: MIT
 Documentation and thesis text: CC BY-NC 3.0
