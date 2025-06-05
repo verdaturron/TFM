@@ -5,9 +5,9 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 
-# --------- arguments Snakemake ----------
+# arguments Snakemake
 
-quant_files <- unlist(snakemake@input[["quant"]])   # → vecteur de chemins
+quant_files <- unlist(snakemake@input[["quant"]]) 
 names(quant_files) <- basename(dirname(quant_files))
 
 
@@ -15,7 +15,7 @@ gtf_file   <- snakemake@input[["gtf"]]
 out_counts <- snakemake@output[["counts"]]
 out_tpm    <- snakemake@output[["tpm"]]
 
-# --------- table tx2gene -----------------
+# table tx2gene 
 tx2gene <- read_tsv(gtf_file,
                     comment = "#", col_names = FALSE,
                     col_types = cols(.default = "c")) |>
@@ -28,11 +28,11 @@ tx2gene <- read_tsv(gtf_file,
   drop_na() |>
   distinct()
 
-# --------- tximport ----------------------
+# tximport
 txi <- tximport(files   = quant_files,
                 type    = "salmon",
                 tx2gene = tx2gene,
-                ignoreTxVersion = TRUE)   # ⇐ règle la discordance “.1”
+                ignoreTxVersion = TRUE)
 
 write_tsv(as_tibble(txi$counts,    rownames = "gene_id"), out_counts)
 write_tsv(as_tibble(txi$abundance, rownames = "gene_id"), out_tpm)
