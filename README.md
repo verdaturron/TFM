@@ -1,5 +1,5 @@
 # SupraWaves RNA-seq pipeline
-![version](https://img.shields.io/badge/version-0.5-blue)![documentation](https://img.shields.io/badge/documentation-under--construction-red)
+![version](https://img.shields.io/badge/version-0.5-blue) ![documentation](https://img.shields.io/badge/documentation-under--construction-red)
 
 ## Overview
 This project contains a **Snakemake** workflow that processes raw FASTQ files from dog (*MDCK*) cells into:
