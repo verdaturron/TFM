@@ -4,6 +4,6 @@ channels:
   - defaults
 
 dependencies:
-  - salmon=1.10.3           # ← version stable (prend la plus récente si tu enlèves “=1.10”)
-  - libgomp               # bibliothèque OpenMP nécessaire sous Linux/WSL
+  - salmon=1.10.3          
+  - libgomp              
   - python=3.9
