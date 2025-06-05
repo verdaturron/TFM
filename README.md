@@ -80,11 +80,6 @@ The main results land in results/. A full HTML report is under results/multiqc/.
 - results/report/workflow_dag.html – graph of the whole pipeline
 
 
-...
-
-    results/report/workflow_dag.svg – graph of the whole pipeline
-
----
 
 ### 🔄 Pipeline DAG
 
