@@ -80,6 +80,19 @@ The main results land in results/. A full HTML report is under results/multiqc/.
 - results/report/workflow_dag.html – graph of the whole pipeline
 
 
+...
+
+    results/report/workflow_dag.svg – graph of the whole pipeline
+
+---
+
+### 🔄 Pipeline DAG
+
+The full structure of the pipeline is shown below (generated automatically by Snakemake):
+
+![Workflow DAG](/docs/workflow_dag.svg)
+
+
 # 5. Software
 
 All tools run inside small conda environments listed in envs/.
