@@ -1,6 +1,6 @@
 # SupraWaves RNA-seq pipeline
 ## Overview
-
+<img alt="Static Badge" src="https://img.shields.io/badge/version-0.5?labelColor=808080&color=0000FF">
 This project contains a **Snakemake** workflow that processes raw FASTQ files from dog (*MDCK*) cells into:
 
 - ✅ Quality reports (**FastQC**, **MultiQC**)  
