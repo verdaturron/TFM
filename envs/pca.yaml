@@ -4,7 +4,6 @@ channels:
 dependencies:
   - r-base=4.3
   - bioconductor-deseq2
-  # tidyverse light
   - r-readr
   - r-dplyr
   - r-tibble
