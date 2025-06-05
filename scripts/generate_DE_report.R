@@ -3,9 +3,8 @@
 ## Ce script produit un rapport HTML interactif (ReportingTools)
 ## pour vos résultats DESeq2 (avec mini-boxplots par gène).
 
-# ───────────────────────────────────────────────────────────────────────
 # 0. Installer / charger les packages nécessaires
-# ───────────────────────────────────────────────────────────────────────
+
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager", repos = "https://cloud.r-project.org")
 
