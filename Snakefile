@@ -1,6 +1,6 @@
 configfile: "config/config.yaml"
 
-SAMPLES     = config["samples"]          # noms sans _R1/_R2
+SAMPLES     = config["samples"]         
 FASTQ_DIR   = config["fastq_dir"]
 RESULTS     = config["results_dir"]
 THREADS     = config["threads"]
@@ -14,9 +14,9 @@ TRANSCRIPTS  = REF["transcript_fasta"]
 GTF          = REF["gtf"]
 SALMON_INDEX = REF["salmon_index"]
 
-# ---------------------------------------------------------
-#  RÈGLE SOMMAIRE (tout ce qu’on veut en sortie)
-# ---------------------------------------------------------
+
+######  RÈGLE SOMMAIRE (tout ce qu’on veut en sortie)
+
 import itertools
 
 # dé-duplique et ordonne les conditions déclarées dans le YAML
@@ -26,9 +26,9 @@ CONDITIONS = sorted(set(config["conditions"]))
 PAIRS = [(a, b) for a, b in itertools.combinations(CONDITIONS, 2)]
 
 
-# ──────────────────────────────────────────────────────────────
-# Lire la liste des conditions depuis le YAML & générer les paires
-# ──────────────────────────────────────────────────────────────
+###### Lire la liste des conditions depuis le YAML & générer les paires
+
+
 CONDITIONS = config["conditions"]
 PAIRS = list(itertools.combinations(CONDITIONS, 2))
 
@@ -51,7 +51,7 @@ rule all:
         expand(f"{RESULTS}/fastqc_posttrim/{{sample}}_R1_trimmed_fastqc.html", sample=SAMPLES),
         expand(f"{RESULTS}/fastqc_posttrim/{{sample}}_R2_trimmed_fastqc.html", sample=SAMPLES),
 
-        # 4. Quantification Salmon (fichier quant.sf)
+        # 4. Quantification Salmon
         expand(f"{RESULTS}/salmon/{{sample}}/quant.sf", sample=SAMPLES),
 
         # 5. Rapport global
@@ -60,7 +60,7 @@ rule all:
         # 6. Expression génique
         f"{RESULTS}/expression/gene_counts.tsv",
 
-        # — Les sorties déjà existantes (FastQC, trim, Salmon, tximport, etc.) —
+        #  Les sorties déjà existantes (FastQC, trim, Salmon, tximport, etc.) —
         expand(f"{RESULTS}/fastqc/{{sample}}_R1_fastqc.html",sample=SAMPLES), \
         expand(f"{RESULTS}/fastqc/{{sample}}_R2_fastqc.html",sample=SAMPLES), \
         expand(f"{RESULTS}/trimmed/{{sample}}_R1_trimmed.fastq.gz",sample=SAMPLES), \
@@ -71,13 +71,13 @@ rule all:
         f"{RESULTS}/multiqc/multiqc_report.html", \
         f"{RESULTS}/expression/gene_counts.tsv",
 
-        # — Tous les TSV DE deux-à-deux —
+        #  Tous les TSV DE deux-à-deux
         *PAIR_TSVS,
 
-        # — Le TSV fusionné —
+        #  Le TSV fusionné 
         "results/deseq2/deseq2_all_pairwise.tsv",
 
-        # —les volcano-plots PDF —
+        # —les volcano-plots PDF 
         *[
         f"results/plots/volcano_{c1}_vs_{c2}.pdf"
         for c1, c2 in PAIRS
@@ -151,7 +151,7 @@ rule fastqc_trimmed:
         {FASTQC} "{input.r1}" "{input.r2}" --outdir {RESULTS}/fastqc_posttrim -t {threads}
         """
 
-# ---------- Histogrammes qualité / longueur (Before vs After) ----------
+    # ---------- Histogrammes qualité / longueur (avant vs apres) ----------
 rule fastqc_histograms:
     input:
         raw_zip  = f"{RESULTS}/fastqc/{{sample}}_R1_fastqc.zip",
@@ -240,7 +240,7 @@ rule quant:
             -o $(dirname {output.quant})
         """
 
-# -------------- 7. Agrégation transcript -> gène -----------------
+# -------------- 7. Agrégation transcript -----------------
 rule tximport:
     input:
         quant = expand(f"{RESULTS}/salmon/{{sample}}/quant.sf", sample=SAMPLES),
