@@ -13,7 +13,7 @@ samples:
   - Entirely-Photoactivated-2
   - Entirely-Photoactivated-3
 
-# chemin WSL : on le met ENTIEREMENT entre guillemets car il contient des espaces
+# chemin WSL 
 fastq_dir: "/mnt/c/Users/pirag/Documents/TFM/RNAseq data/Processed_star_run4/1_Filtered"
 
 results_dir: "results"     # dossier où vont les sorties
@@ -24,16 +24,16 @@ ref:
   gtf:              "ref/CanFam.gtf.gz"
   salmon_index:     "ref/salmon_index"
 
-# ------------------------------------------------------------------
-# Paramètres spécifiques pour le volcano plot
-# ------------------------------------------------------------------
-volcano:
-  padj_cutoff: 0.1   # Seuil de FDR ajustée (padj) pour considérer un gène significatif
-  lfc_cutoff: 1       # Seuil du log2 fold change (en valeur absolue)
 
-# ------------------------------------------------------------------
-# LISTE DES MODALITÉS / CONDITIONS (pour les comparaisons deux-à-deux)
-# ------------------------------------------------------------------
+# Paramètres pour le volcano plot
+
+volcano:
+  padj_cutoff: 0.1   
+  lfc_cutoff: 1       
+
+
+# LISTE DES MODALITÉS / CONDITIONS pour les comparaisons
+
 conditions:
   - Border
   - Central
