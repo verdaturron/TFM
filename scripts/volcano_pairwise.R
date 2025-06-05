@@ -6,7 +6,7 @@ suppressPackageStartupMessages({
   library(ggrepel)
 })
 
-# ── paramètres venant de Snakemake ──────────────────────────────
+# paramètres snake
 tsv_file   <- snakemake@input[[1]]
 pdf_file   <- snakemake@output[["pdf"]]
 png_file   <- snakemake@output[["png"]]
@@ -20,7 +20,7 @@ contrast <- basename(tsv_file) |>
 parts <- strsplit(contrast, "_vs_")[[1]]
 cond1 <- parts[1];  cond2 <- parts[2]
 
-# ── lecture des résultats DESeq2 ────────────────────────────────
+# lecture des résultats DESeq2
 dt <- read_tsv(tsv_file, show_col_types = FALSE) |>
   mutate(
     status = case_when(
@@ -31,7 +31,7 @@ dt <- read_tsv(tsv_file, show_col_types = FALSE) |>
     negLog10FDR = -log10(padj)
   )
 
-# ── volcano plot ────────────────────────────────────────────────
+# volcano plot
 p <- ggplot(dt, aes(log2FoldChange, negLog10FDR, colour = status)) +
   geom_point(size = 1.2, alpha = .8) +
   scale_colour_manual(values = c(Down = "forestgreen",
@@ -45,7 +45,7 @@ p <- ggplot(dt, aes(log2FoldChange, negLog10FDR, colour = status)) +
        colour = NULL) +
   theme_bw(base_size = 12)
 
-# annoter les 10 gènes les plus significatifs
+# annoter 10 gènes plus significatifs
 top10 <- dt |>
   filter(status != "No") |>
   arrange(padj) |>
@@ -57,19 +57,19 @@ p <- p + geom_text_repel(
   size = 3,
   max.overlaps = 50
 )
-# ── calcul du nombre total de gènes et annotation ───────────────
+# calcul nombre total de gènes et annotation
 total_feat <- nrow(dt)
 caption    <- paste("Total:", total_feat, "features")
 
 p <- p +
   annotate("text",
-           x = max(dt$log2FoldChange, na.rm = TRUE) * 0.98,  # 98 % à droite
-           y = min(dt$negLog10FDR,   na.rm = TRUE) + 0.05,   # un poil au-dessus
+           x = max(dt$log2FoldChange, na.rm = TRUE) * 0.98,  
+           y = min(dt$negLog10FDR,   na.rm = TRUE) + 0.05,   
            label = caption,
            hjust = 1, vjust = 0,
            size = 3)
 
-# ── sauvegarde ─────────────────────────────────────────────────
+# sauvegarde
 dir.create(dirname(pdf_file), showWarnings = FALSE, recursive = TRUE)
 ggsave(pdf_file, p, width = 7, height = 7)
 ggsave(png_file, p, width = 7, height = 7, dpi = 300)
