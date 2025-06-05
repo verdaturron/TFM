@@ -15,5 +15,5 @@ dependencies:
   - r-ggplot2
   - bioconductor-clusterprofiler
   - bioconductor-enrichplot
-  # Remplacer par le nom exact :
+
   - bioconductor-org.cf.eg.db
