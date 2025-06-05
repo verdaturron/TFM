@@ -4,5 +4,5 @@ channels:
   - defaults
 dependencies:
   - r-base=4.3.*
-  - bioconductor-tximport      # le vrai package dont on a besoin
+  - bioconductor-tximport      
   - r-tidyverse
